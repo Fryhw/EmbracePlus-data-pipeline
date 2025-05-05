@@ -68,6 +68,13 @@ class AvroParser:
             }
         )
         return df
+    @staticmethod
+    def _parse_single_modality2(s_dict) -> pd.DataFrame:
+        # Assuming s_dict contains keys and their corresponding lists of values
+        # If you want to create a DataFrame from s_dict, we need to properly unpack it
+        df = pd.DataFrame(s_dict)
+        return df
+
 
     # ------------------------------ Main functions ---------------------------------
     def parse_record(record_dict) -> dict:
@@ -79,6 +86,8 @@ class AvroParser:
             "eda": AvroParser._parse_single_modality(data["eda"], col_name="EDA"),
             "bvp": AvroParser._parse_single_modality(data["bvp"], col_name="BVP"),
             "tmp": AvroParser._parse_single_modality(data["temperature"], "TMP"),
+            "tags": AvroParser._parse_single_modality2(data["tags"]),
+            "systolicPeaks": AvroParser._parse_single_modality2(data["systolicPeaks"]),
             "metadata": {
                 k: record_dict[k]
                 for k in set(record_dict.keys()).difference({"rawData"})
@@ -105,18 +114,26 @@ class AvroParser:
         for r in records:
             r["metadata"]["filePath"] = str(file_path)
         return records
-
+    
     @staticmethod
     def merge_avro_data(avros: List[dict]) -> dict:
         def _concat_dfs(dfs) -> pd.DataFrame:
             return (
                 pd.concat(dfs, axis=0).sort_values("timestamp").reset_index(drop=True)
             )
+    
+        def _concat_tags(tags_list) -> pd.Series:
+            # On force le type int64 pour éviter l'affichage en notation scientifique
+            return pd.concat(tags_list, axis=0).reset_index(drop=True)
 
+    
         return {
             "acc": _concat_dfs([a["acc"] for a in avros]),
             "gyro": _concat_dfs([a["gyro"] for a in avros]),
             "eda": _concat_dfs([a["eda"] for a in avros]),
             "bvp": _concat_dfs([a["bvp"] for a in avros]),
             "tmp": _concat_dfs([a["tmp"] for a in avros]),
+            # Appliquer _concat_tags pour la colonne 'tags'
+            "tags": _concat_tags([a["tags"] for a in avros]),
+            "systolicPeaks": _concat_tags([a["systolicPeaks"] for a in avros]),
         }
