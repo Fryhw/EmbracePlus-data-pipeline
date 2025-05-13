@@ -160,3 +160,5 @@ sphinx/_autosummary
 PREPROCESS_RAW_METADATA.ipynb
 
 *.zip
+/loc_data
+/notebooks/MBRAIN21-001.empatica.E4.A02FDF
