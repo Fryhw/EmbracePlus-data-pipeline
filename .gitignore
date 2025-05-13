@@ -162,3 +162,7 @@ PREPROCESS_RAW_METADATA.ipynb
 *.zip
 /loc_data
 /notebooks/MBRAIN21-001.empatica.E4.A02FDF
+notebooks/signals_bvp.pt
+notebooks/signals_tensor2.pt
+notebooks/signals_tensor1.pt
+*.pt
